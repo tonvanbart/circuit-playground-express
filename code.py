@@ -4,6 +4,11 @@ import board
 import neopixel
 import microcontroller
 import touchio
+import array
+import math
+import digitalio
+from audioio import AudioOut
+from audioio import RawSample
 
 pixels = neopixel.NeoPixel(board.NEOPIXEL, 10, brightness=0.01, auto_write=False)
 
@@ -23,6 +28,25 @@ PURPLE = (180, 0, 255)
 WHITE = (255, 255, 255)
 OFF = (0, 0, 0)
 
+FREQUENCY = 880
+SAMPLERATE = 8000
+length = SAMPLERATE // FREQUENCY
+sine_wave = array.array("H", [0] * length)
+for i in range(length):
+    sine_wave[i] = int(math.sin(math.pi * 2 * i / length) * (2 ** 15) + 2 ** 15)
+
+# Enable the speaker
+speaker_enable = digitalio.DigitalInOut(board.SPEAKER_ENABLE)
+speaker_enable.direction = digitalio.Direction.OUTPUT
+speaker_enable.value = True
+audio = AudioOut(board.SPEAKER)
+sine_wave_sample = RawSample(sine_wave)
+
+def beep():
+    audio.play(sine_wave_sample, loop=True)  # Play the single sine_wave sample continuously...
+    time.sleep(1)  # for the duration of the sleep (in seconds)
+    audio.stop()  # and then stop.
+
 def wait_any_touch():
     touched = False
     while not touched:
@@ -31,6 +55,7 @@ def wait_any_touch():
             # light up one pixel to indicate touch detected
             pixels[4] = CYAN
             pixels.show()
+            beep()
             touched = True
         time.sleep(0.1)
         pixels[4] = OFF
