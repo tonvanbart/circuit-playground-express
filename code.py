@@ -44,7 +44,7 @@ sine_wave_sample = RawSample(sine_wave)
 
 def beep():
     audio.play(sine_wave_sample, loop=True)  # Play the single sine_wave sample continuously...
-    time.sleep(1)  # for the duration of the sleep (in seconds)
+    time.sleep(0.1)  # for the duration of the sleep (in seconds)
     audio.stop()  # and then stop.
 
 def wait_any_touch():
